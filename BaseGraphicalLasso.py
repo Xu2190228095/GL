@@ -121,26 +121,26 @@ class BaseGraphicalLasso(object):
         start_time = time.time()
         while self.iteration < max_iter and stopping_criteria is False:
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print "\n*** Iteration %s ***" % self.iteration
-                print "Time passed: {0:.3g}s".format(time.time() - start_time)
-                print "Rho: %s" % self.rho
-                print "Eta: %s" % self.eta
-                print "Step: {0:.3f}".format(1/(2*self.eta))
+                print("\n*** Iteration %s ***" % self.iteration)
+                print("Time passed: {0:.3g}s".format(time.time() - start_time))
+                print("Rho: %s" % self.rho)
+                print("Eta: %s" % self.eta)
+                print("Step: {0:.3f}".format(1 / (2 * self.eta)))
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.theta_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print "Theta update: {0:.3g}s".format(time.time() - s_time)
+                print("Theta update: {0:.3g}s".format(time.time() - s_time))
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.z_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print "Z-update: {0:.3g}s".format(time.time() - s_time)
+                print("Z-update: {0:.3g}s".format(time.time() - s_time))
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.u_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print "U-update: {0:.3g}s".format(time.time() - s_time)
+                print("U-update: {0:.3g}s".format(time.time() - s_time))
             """ Check stopping criteria """
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
@@ -178,9 +178,9 @@ class BaseGraphicalLasso(object):
         self.only_true_false_edges()
         self.terminate_processes()
         if stopping_criteria:
-            print "\nIterations to complete: %s" % self.iteration
+            print("\nIterations to complete: %s" % self.iteration)
         else:
-            print "\nMax iterations (%s) reached" % max_iter
+            print("\nMax iterations (%s) reached" % max_iter)
 
     """ Converts values in the thetas into boolean values,
         informing only the existence of an edge without weight. """

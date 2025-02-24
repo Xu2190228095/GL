@@ -46,11 +46,11 @@ class DataHandler(object):
         self.inverse_sigmas.append(network)
         if inversion:
             sigma = np.linalg.inv(network)
-            print np.linalg.eigvals(sigma)
+            print(np.linalg.eigvals(sigma))
             self.sigmas.append(sigma)
-            print sigma
-            print np.shape(sigma)
-            print network
+            print(sigma)
+            print(np.shape(sigma))
+            print(network)
 
     """ Generates a data file (.csv) from networks previously defined in
         self.sigmas (covariance matrix) """

@@ -96,53 +96,53 @@ if __name__ == "__main__" and len(sys.argv) == 6:
     beta = float(sys.argv[5])
 
     """ Create solver instance """
-    print "\nReading file: %s\n" % filename
+    print("\nReading file: %s\n" % filename)
     solver = SerialTVGL(filename=filename,
                         penalty_function=penalty_function,
                         blocks=blocks,
                         lambd=lambd,
                         beta=beta,
                         datecolumn=real_data)
-    print "Total data samples: %s" % solver.datasamples
-    print "Blocks: %s" % solver.blocks
-    print "Observations in a block: %s" % solver.obs
-    print "Rho: %s" % solver.rho
-    print "Lambda: %s" % solver.lambd
-    print "Beta: %s" % solver.beta
-    print "Penalty function: %s" % solver.penalty_function
-    print "Processes: %s" % solver.processes
+    print("Total data samples: %s" % solver.datasamples)
+    print("Blocks: %s" % solver.blocks)
+    print("Observations in a block: %s" % solver.obs)
+    print("Rho: %s" % solver.rho)
+    print("Lambda: %s" % solver.lambd)
+    print("Beta: %s" % solver.beta)
+    print("Penalty function: %s" % solver.penalty_function)
+    print("Processes: %s" % solver.processes)
 
     """ Run algorithm """
-    print "\nRunning algorithm..."
+    print("\nRunning algorithm...")
     solver.run_algorithm()
 
     """ Evaluate and print results """
-    print "\nNetwork 0:"
+    print("\nNetwork 0:")
     for j in range(solver.dimension):
-        print solver.thetas[0][j, :]
-    print "\nTemporal deviations: "
+        print(solver.thetas[0][j, :])
+    print("\nTemporal deviations: ")
     solver.temporal_deviations()
-    print solver.deviations
-    print "Normalized Temporal deviations: "
-    print solver.norm_deviations
+    print(solver.deviations)
+    print("Normalized Temporal deviations: ")
+    print(solver.norm_deviations)
     try:
-        print "Temp deviations ratio: {0:.3g}".format(solver.dev_ratio)
+        print("Temp deviations ratio: {0:.3g}".format(solver.dev_ratio))
     except ValueError:
-        print "Temp deviations ratio: n/a"
+        print("Temp deviations ratio: n/a")
 
     """ Evaluate and create result file """
     if not real_data:
         solver.correct_edges()
-        print "\nTotal Edges: %s" % solver.real_edges
-        print "Correct Edges: %s" % solver.correct_positives
-        print "Total Zeros: %s" % solver.real_edgeless
+        print("\nTotal Edges: %s" % solver.real_edges)
+        print("Correct Edges: %s" % solver.correct_positives)
+        print("Total Zeros: %s" % solver.real_edgeless)
         false_edges = solver.all_positives - solver.correct_positives
-        print "False Edges: %s" % false_edges
-        print "F1 Score: %s" % solver.f1score
+        print("False Edges: %s" % false_edges)
+        print("F1 Score: %s" % solver.f1score)
         datahandler.write_results(filename, solver)
     else:
         datahandler.write_network_results(filename, solver)
 
     """ Running times """
-    print "\nAlgorithm run time: %s seconds" % (solver.run_time)
-    print "Execution time: %s seconds" % (time.time() - start_time)
+    print("\nAlgorithm run time: %s seconds" % (solver.run_time))
+    print("Execution time: %s seconds" % (time.time() - start_time))

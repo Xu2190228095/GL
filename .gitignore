@@ -4,3 +4,4 @@ drafts/*
 results/*.csv
 network_results/*.csv
 matlab/*
+.idea/*
