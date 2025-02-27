@@ -57,7 +57,7 @@ class StaticGL(BaseGraphicalLasso):
     # in parallel.
 
     def __init__(self, *args, **kwargs):
-        super(StaticGL, self).__init__(beta=0, *args, **kwargs)
+        super().__init__(beta=0, *args, **kwargs)
         self.eta = float(self.obs)/float(self.rho)
         self.iteration = "n/a"
         self.penalty_function = "n/a"
@@ -88,7 +88,7 @@ if __name__ == "__main__" and len(sys.argv) == 5:
     #  4. number of processes
 
     start_time = time.time()
-    datahandler = DataHandler()
+    data_handler = DataHandler()
 
     """ Parameters for creating solver instance """
     filename = sys.argv[1]
@@ -142,9 +142,9 @@ if __name__ == "__main__" and len(sys.argv) == 5:
         false_edges = solver.all_positives - solver.correct_positives
         print("False Edges: %s" % false_edges)
         print("F1 Score: %s" % solver.f1score)
-        datahandler.write_results(filename, solver)
+        data_handler.write_results(filename, solver)
     else:
-        datahandler.write_network_results(filename, solver)
+        data_handler.write_network_results(filename, solver)
 
     """ Running times """
     print("\nAlgorithm run time: %s seconds" % (solver.run_time))
