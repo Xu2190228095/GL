@@ -1,17 +1,16 @@
-
 import numpy as np
 import datetime
 import sys
 
 
 class DataHandler(object):
-
     # Object for creating inverse covariance matrices
     # and covariance matrices from network files,
     # creating synthetic data sets,
     # writing solver results
 
     """ Initialize attributes """
+
     def __init__(self):
         self.inverse_sigmas = []
         self.sigmas = []
@@ -21,6 +20,7 @@ class DataHandler(object):
         inverse covariance matrices. Expected format for
         networks in given files is:
         [start node index],[end node index],[edge weight]  """
+
     def read_network(self, filename, comment="#", splitter=",",
                      inversion=True):
         nodes = []
@@ -41,8 +41,8 @@ class DataHandler(object):
                 if comment in line:
                     continue
                 data = line.split(splitter)
-                network[int(data[0])-1, int(data[1])-1] = float(data[2])
-                network[int(data[1])-1, int(data[0])-1] = float(data[2])
+                network[int(data[0]) - 1, int(data[1]) - 1] = float(data[2])
+                network[int(data[1]) - 1, int(data[0]) - 1] = float(data[2])
         self.inverse_sigmas.append(network)
         if inversion:
             sigma = np.linalg.inv(network)
@@ -54,6 +54,7 @@ class DataHandler(object):
 
     """ Generates a data file (.csv) from networks previously defined in
         self.sigmas (covariance matrix) """
+
     def generate_real_data(self, counts=[100, 100]):
         if len(counts) is not len(self.sigmas):
             raise Exception(
@@ -68,12 +69,11 @@ class DataHandler(object):
                 z = x
             else:
                 z = np.vstack((z, x))
-        filename = "synthetic_data/%sx%s_%s.csv" % (
-            total_count, self.dimension,
-            datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        filename = (f"synthetic_data/"
+                    f"{total_count}x{self.dimension}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.csv")
         header = "# Data generated from networks:\n# "
         for f, datacount in zip(self.network_files, counts):
-            header += "%s: %s, " % (f, datacount)
+            header += f"{f}: {datacount}, "
         header = header[:-2]
         header += "\n"
         with open(filename, "w") as new_file:
@@ -83,9 +83,10 @@ class DataHandler(object):
                 for value in datarow:
                     line += "," + str("{0:.4f}".format(value))
                 line = line[1:]
-                new_file.write("%s\n" % line)
+                new_file.write(f"{line}\n")
 
     """ Converts a network into matrix form """
+
     def write_network_to_matrix_form(self, datafile):
         new_filename = datafile.split(".")[0] + "_matrix.csv"
         self.read_network(datafile, inversion=False)
@@ -99,6 +100,7 @@ class DataHandler(object):
 
     """ Creates a file containing results, with network details,
         from converged algorithm instance """
+
     def write_network_results(self, datafile, solver, splitter=","):
         run_time = datetime.datetime.now()
         results_name = "network_results/%s_la%sbe%s_%s.csv" % (
@@ -157,7 +159,7 @@ class DataHandler(object):
                 f.write(solver.blockdates[k] + "\n")
                 if k > 0:
                     f.write("Dev to prev,")
-                    f.write("{0:.3f},".format(solver.deviations[k-1]))
+                    f.write("{0:.3f},".format(solver.deviations[k - 1]))
                 if k < solver.blocks - 1:
                     f.write("Dev to next,")
                     f.write("{0:.3f}".format(solver.deviations[k]))
@@ -174,6 +176,7 @@ class DataHandler(object):
 
     """ Creates a file containing results, without network details,
         from converged solver instance """
+
     def write_results(self, datafile, solver, splitter=','):
         run_time = datetime.datetime.now()
         results_name = "results/%s_la%sbe%s_%s.csv" % (
@@ -236,6 +239,6 @@ if __name__ == "__main__" and len(sys.argv) % 2 == 1:
     data_counts = []
     for i in range(1, len(sys.argv), 2):
         dh.read_network(sys.argv[i])
-        data_counts.append(int(sys.argv[i+1]))
+        data_counts.append(int(sys.argv[i + 1]))
     if len(data_counts) > 0:
         dh.generate_real_data(data_counts)
