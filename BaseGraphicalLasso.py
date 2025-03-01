@@ -101,7 +101,8 @@ class BaseGraphicalLasso(object):
             filename = network_info.split(":")[0].strip("#").strip()
             datacount = network_info.split(":")[1].strip()
             sub_blocks = int(datacount)/self.obs
-            for i in range(sub_blocks):
+            # print(f"datacount:{datacount},obs:{self.obs},sub_blocks:{sub_blocks}")
+            for i in range(int(sub_blocks)):
                 dh.read_network(filename, inversion=False)
         self.real_thetas = dh.inverse_sigmas
         dh = None
@@ -121,26 +122,26 @@ class BaseGraphicalLasso(object):
         start_time = time.time()
         while self.iteration < max_iter and stopping_criteria is False:
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print("\n*** Iteration %s ***" % self.iteration)
-                print("Time passed: {0:.3g}s".format(time.time() - start_time))
-                print("Rho: %s" % self.rho)
-                print("Eta: %s" % self.eta)
-                print("Step: {0:.3f}".format(1 / (2 * self.eta)))
+                print(f"\n*** Iteration {self.iteration} ***")
+                print(f"Time passed: {time.time() - start_time:.3g}s")
+                print(f"Rho: {self.rho}")
+                print(f"Eta: {self.eta}")
+                print(f"Step: {1 / (2 * self.eta):.3f}")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.theta_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print("Theta update: {0:.3g}s".format(time.time() - s_time))
+                print(f"Theta update: {time.time() - s_time:.3g}s")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.z_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print("Z-update: {0:.3g}s".format(time.time() - s_time))
+                print(f"Z-update: {time.time() - s_time:.3g}s")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.u_update()
             if self.iteration % 500 == 0 or self.iteration == 1:
-                print("U-update: {0:.3g}s".format(time.time() - s_time))
+                print(f"U-update: {time.time() - s_time:.3g}s")
             """ Check stopping criteria """
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
@@ -153,7 +154,7 @@ class BaseGraphicalLasso(object):
                     stopping_criteria = True
             thetas_pre = list(self.thetas)
             self.iteration += 1
-        self.run_time = "{0:.3g}".format(time.time() - start_time)
+        self.run_time = f"{time.time() - start_time:.3g}"
         self.final_tuning(stopping_criteria, max_iter)
 
     def theta_update(self):
