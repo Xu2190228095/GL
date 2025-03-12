@@ -15,7 +15,9 @@ class BaseGraphicalLasso(object):
     """ Initialize attributes, read data """
     def __init__(self, filename, blocks, lambd, beta,
                  processes, penalty_function="group_lasso",
-                 datecolumn=True):
+                 datecolumn=True, EDGE=False, isOneBit=True):
+        self.EDGE = EDGE
+        self.isOneBit = isOneBit
         self.datecolumn = datecolumn
         self.processes = processes
         self.blocks = blocks
@@ -85,9 +87,22 @@ class BaseGraphicalLasso(object):
                         end_date = line.strip().split(splitter)[0]
                         self.blockdates[block] = start_date + " - " + end_date
                     datablck = np.array(lst)
-                    tp = datablck.transpose()
-                    self.emp_cov_mat[block] = np.real(
-                        np.dot(tp, datablck)/self.obs)
+                    sign_data = np.sign(datablck)
+                    if(self.EDGE):
+                        sum_outer = np.einsum('ij,ik->jk', sign_data, sign_data)
+                        scale = np.pi / (2 * self.obs)
+
+                        S_hat = np.sin(scale * sum_outer)
+                        self.emp_cov_mat[block] = np.real(S_hat)
+                    else:
+                        if(self.isOneBit):
+                            tp = sign_data.transpose()
+                            self.emp_cov_mat[block] = np.real(
+                                np.dot(tp, sign_data) / self.obs)
+                        else:
+                            tp = datablck.transpose()
+                            self.emp_cov_mat[block] = np.real(
+                                np.dot(tp, datablck)/self.obs)
                     lst = []
                     count = 0
                     block += 1

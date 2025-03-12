@@ -5,3 +5,4 @@ results/*.csv
 network_results/*.csv
 matlab/*
 .idea/*
+synthetic_data/*

@@ -101,7 +101,8 @@ if __name__ == "__main__" and len(sys.argv) == 3:
     print("\nReading file: %s\n" % filename)
     solver = SingleGL(filename=filename,
                       lambd=lambd,
-                      datecolumn=real_data)
+                      datecolumn=real_data,
+                      EDGE=True)
     print("Total data samples: %s" % solver.datasamples)
     print("Blocks: %s" % solver.blocks)
     print("Observations in a block: %s" % solver.obs)

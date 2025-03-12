@@ -43,7 +43,7 @@ class SingleCLIME(BaseGraphicalLasso):
         # 定义求解器配置字典（按需选择）
         solver_config = {
             "solver": cp.ECOS,  # 默认使用ECOS
-            "max_iters": 1000,
+            "max_iters": max_iter,
             "verbose": False
         }
 
@@ -74,7 +74,7 @@ class SingleCLIME(BaseGraphicalLasso):
                 if problem.status not in ["optimal", "optimal_inaccurate"]:
                     raise RuntimeError(f"Column {i}求解失败，状态码: {problem.status}")
                 theta_columns[:, i] = beta.value
-                theta_columns[np.abs(theta_columns) < 2e-1] = 0  # 截断阈值
+                theta_columns[np.abs(theta_columns) < 1e-6] = 0  # 截断阈值
             except Exception as e:
                 print(f"第{i}列求解异常: {str(e)}", file=sys.stderr)
                 theta_columns[:, i] = np.zeros(p)  # 失败时填充零
@@ -134,7 +134,8 @@ if __name__ == "__main__" and len(sys.argv) == 3:
     print("\nReading file: %s\n" % filename)
     solver = SingleCLIME(filename=filename,
                       lambd=lambd,
-                      datecolumn=real_data)
+                      datecolumn=real_data,
+                      EDGE=True)
     print("Total data samples: %s" % solver.datasamples)
     print("Blocks: %s" % solver.blocks)
     print("Observations in a block: %s" % solver.obs)

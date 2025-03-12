@@ -1,6 +1,7 @@
 import numpy as np
 import datetime
 import sys
+import random
 
 
 class DataHandler(object):
@@ -20,6 +21,67 @@ class DataHandler(object):
         inverse covariance matrices. Expected format for
         networks in given files is:
         [start node index],[end node index],[edge weight]  """
+
+    def generate_network(self, filename, perturbed_filename, node, edge):
+        max_possible = node * (node - 1) // 2
+        if edge > max_possible:
+            raise ValueError(f"Error: 无法生成 {edge} 条边，最多只能生成 {max_possible} 条边")
+
+        # 生成所有可能的无向边（u < v）
+        possible_edges = [(u, v) for u in range(1, node + 1) for v in range(u + 1, node + 1)]
+
+        # 随机选择指定数量的边
+        selected_edges = random.sample(possible_edges, edge)
+
+        precision_matrix = np.eye(node)
+
+        # 生成带权重的数据
+        for u, v in selected_edges:
+            weight = round(random.uniform(0.1, 1), 1)
+            precision_matrix[u - 1, v - 1] = weight
+            precision_matrix[v - 1, u - 1] = weight
+
+        perturbed_node = random.randint(0, node - 1)
+        perturbed_precision_matrix = precision_matrix.copy()
+        for i in range(node):
+            if i == perturbed_node:
+                continue
+            perturbed_precision_matrix[i, perturbed_node] = 0
+            perturbed_precision_matrix[perturbed_node, i] = perturbed_precision_matrix[i, perturbed_node]
+
+        eigvals_min = min(np.linalg.eigvals(precision_matrix).min(), np.linalg.eigvals(perturbed_precision_matrix).min())
+        precision_matrix += (0.1 + np.abs(eigvals_min)) * np.eye(node)
+        perturbed_precision_matrix += (0.1 + np.abs(eigvals_min)) * np.eye(node)
+
+        eigvals_max = max(np.linalg.eigvals(precision_matrix).max(), np.linalg.eigvals(perturbed_precision_matrix).max())
+        precision_matrix = precision_matrix / eigvals_max
+        perturbed_precision_matrix = perturbed_precision_matrix / eigvals_max
+
+        graph_data = []
+        for i in range(node):
+            for j in range(i + 1, node):
+                if precision_matrix[i][j] != 0:
+                    graph_data.append((i + 1, j + 1, precision_matrix[i][j]))
+
+        graph_data = sorted(graph_data, key=lambda x: (x[0], x[1]))
+
+        perturbed_graph_data = []
+        for i in range(node):
+            for j in range(i + 1, node):
+                if perturbed_precision_matrix[i][j] != 0:
+                    perturbed_graph_data.append((i + 1, j + 1, perturbed_precision_matrix[i][j]))
+
+        perturbed_graph_data = sorted(perturbed_graph_data, key=lambda x: (x[0], x[1]))
+
+        with open(filename, "w") as f:
+            f.write("#First node,Second node,Weight\n")
+            for data in graph_data:
+                f.write(f"{data[0]},{data[1]},{data[2]}\n")
+
+        with open(perturbed_filename, "w") as f:
+            f.write("#First node,Second node,Weight\n")
+            for data in perturbed_graph_data:
+                f.write(f"{data[0]},{data[1]},{data[2]}\n")
 
     def read_network(self, filename, comment="#", splitter=",",
                      inversion=True):
@@ -236,9 +298,16 @@ if __name__ == "__main__" and len(sys.argv) % 2 == 1:
     # Arbitrary number of pair can be inputted.
 
     dh = DataHandler()
-    data_counts = []
-    for i in range(1, len(sys.argv), 2):
-        dh.read_network(sys.argv[i])
-        data_counts.append(int(sys.argv[i + 1]))
-    if len(data_counts) > 0:
-        dh.generate_real_data(data_counts)
+
+    dh.generate_network("networks/network4.csv", "networks/network5.csv", 50, 200)
+
+    # data_counts = []
+    # for i in range(1, len(sys.argv), 2):
+    #     dh.read_network(sys.argv[i])
+    #     data_counts.append(int(sys.argv[i + 1]))
+    # if len(data_counts) > 0:
+    #     dh.generate_real_data(data_counts)
+
+    dh.read_network("networks/network4.csv")
+    for i in range(100, 5000, 500):
+        dh.generate_real_data([i])
