@@ -1,6 +1,9 @@
 
 import numpy as np
 import time
+
+from sklearn.metrics import roc_auc_score
+
 from DataHandler import DataHandler
 
 
@@ -15,7 +18,7 @@ class BaseGraphicalLasso(object):
     """ Initialize attributes, read data """
     def __init__(self, filename, blocks, lambd, beta,
                  processes, penalty_function="group_lasso",
-                 datecolumn=True, EDGE=False, isOneBit=True):
+                 datecolumn=True, EDGE=False, isOneBit=False):
         self.EDGE = EDGE
         self.isOneBit = isOneBit
         self.datecolumn = datecolumn
@@ -42,6 +45,7 @@ class BaseGraphicalLasso(object):
         self.eta = float(self.obs)/float(3*self.rho)
         self.e = 1e-5
         self.roundup = 1
+        self.threshold = 1e-6
 
     """ Read data from the given file. Get parameters of data
         (number of data samples, observations in a block).
@@ -136,27 +140,27 @@ class BaseGraphicalLasso(object):
         thetas_pre = []
         start_time = time.time()
         while self.iteration < max_iter and stopping_criteria is False:
-            if self.iteration % 500 == 0 or self.iteration == 1:
-                print(f"\n*** Iteration {self.iteration} ***")
-                print(f"Time passed: {time.time() - start_time:.3g}s")
-                print(f"Rho: {self.rho}")
-                print(f"Eta: {self.eta}")
-                print(f"Step: {1 / (2 * self.eta):.3f}")
+            # if self.iteration % 500 == 0 or self.iteration == 1:
+                # print(f"\n*** Iteration {self.iteration} ***")
+                # print(f"Time passed: {time.time() - start_time:.3g}s")
+                # print(f"Rho: {self.rho}")
+                # print(f"Eta: {self.eta}")
+                # print(f"Step: {1 / (2 * self.eta):.3f}")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.theta_update()
-            if self.iteration % 500 == 0 or self.iteration == 1:
-                print(f"Theta update: {time.time() - s_time:.3g}s")
+            # if self.iteration % 500 == 0 or self.iteration == 1:
+            #     print(f"Theta update: {time.time() - s_time:.3g}s")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.z_update()
-            if self.iteration % 500 == 0 or self.iteration == 1:
-                print(f"Z-update: {time.time() - s_time:.3g}s")
+            # if self.iteration % 500 == 0 or self.iteration == 1:
+            #     print(f"Z-update: {time.time() - s_time:.3g}s")
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
             self.u_update()
-            if self.iteration % 500 == 0 or self.iteration == 1:
-                print(f"U-update: {time.time() - s_time:.3g}s")
+            # if self.iteration % 500 == 0 or self.iteration == 1:
+            #     print(f"U-update: {time.time() - s_time:.3g}s")
             """ Check stopping criteria """
             if self.iteration % 500 == 0 or self.iteration == 1:
                 s_time = time.time()
@@ -190,13 +194,15 @@ class BaseGraphicalLasso(object):
     """ Performs final tuning for the converged thetas,
         closes possible multiprocesses. """
     def final_tuning(self, stopping_criteria, max_iter):
-        self.thetas = [np.round(theta, self.roundup) for theta in self.thetas]
-        self.only_true_false_edges()
+        # self.thetas = [np.round(theta, self.roundup) for theta in self.thetas]
+        self.thetas = [np.where(np.abs(theta) >= self.threshold, theta, 0) for theta in self.thetas]
+        self.thetas = [(theta+theta.transpose())/2 for theta in self.thetas]
+        # self.only_true_false_edges()
         self.terminate_processes()
-        if stopping_criteria:
-            print("\nIterations to complete: %s" % self.iteration)
-        else:
-            print("\nMax iterations (%s) reached" % max_iter)
+        # if stopping_criteria:
+        #     print("\nIterations to complete: %s" % self.iteration)
+        # else:
+        #     print("\nMax iterations (%s) reached" % max_iter)
 
     """ Converts values in the thetas into boolean values,
         informing only the existence of an edge without weight. """

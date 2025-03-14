@@ -37,7 +37,7 @@ class DataHandler(object):
 
         # 生成带权重的数据
         for u, v in selected_edges:
-            weight = round(random.uniform(0.1, 1), 1)
+            weight = round(random.uniform(0.5, 1), 1)
             precision_matrix[u - 1, v - 1] = weight
             precision_matrix[v - 1, u - 1] = weight
 
@@ -47,19 +47,19 @@ class DataHandler(object):
             if i == perturbed_node:
                 continue
             perturbed_precision_matrix[i, perturbed_node] = 0
-            perturbed_precision_matrix[perturbed_node, i] = perturbed_precision_matrix[i, perturbed_node]
+            perturbed_precision_matrix[perturbed_node, i] = 0
 
         eigvals_min = min(np.linalg.eigvals(precision_matrix).min(), np.linalg.eigvals(perturbed_precision_matrix).min())
         precision_matrix += (0.1 + np.abs(eigvals_min)) * np.eye(node)
         perturbed_precision_matrix += (0.1 + np.abs(eigvals_min)) * np.eye(node)
 
-        eigvals_max = max(np.linalg.eigvals(precision_matrix).max(), np.linalg.eigvals(perturbed_precision_matrix).max())
-        precision_matrix = precision_matrix / eigvals_max
-        perturbed_precision_matrix = perturbed_precision_matrix / eigvals_max
+        # eigvals_max = max(np.linalg.eigvals(precision_matrix).max(), np.linalg.eigvals(perturbed_precision_matrix).max())
+        # precision_matrix = precision_matrix / eigvals_max
+        # perturbed_precision_matrix = perturbed_precision_matrix / eigvals_max
 
         graph_data = []
         for i in range(node):
-            for j in range(i + 1, node):
+            for j in range(i, node):
                 if precision_matrix[i][j] != 0:
                     graph_data.append((i + 1, j + 1, precision_matrix[i][j]))
 
@@ -67,7 +67,7 @@ class DataHandler(object):
 
         perturbed_graph_data = []
         for i in range(node):
-            for j in range(i + 1, node):
+            for j in range(i, node):
                 if perturbed_precision_matrix[i][j] != 0:
                     perturbed_graph_data.append((i + 1, j + 1, perturbed_precision_matrix[i][j]))
 
@@ -97,7 +97,7 @@ class DataHandler(object):
                 if data[1] not in nodes:
                     nodes.append(int(data[1]))
         self.dimension = max(nodes)
-        network = np.eye(self.dimension)
+        network = np.zeros((self.dimension, self.dimension))
         with open(filename, "r") as f:
             for i, line in enumerate(f):
                 if comment in line:
@@ -132,7 +132,7 @@ class DataHandler(object):
             else:
                 z = np.vstack((z, x))
         filename = (f"synthetic_data/"
-                    f"{total_count}x{self.dimension}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.csv")
+                    f"{self.dimension}x{total_count}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.csv")
         header = "# Data generated from networks:\n# "
         for f, datacount in zip(self.network_files, counts):
             header += f"{f}: {datacount}, "
@@ -299,7 +299,7 @@ if __name__ == "__main__" and len(sys.argv) % 2 == 1:
 
     dh = DataHandler()
 
-    dh.generate_network("networks/network4.csv", "networks/network5.csv", 50, 200)
+    dh.generate_network("networks/network6.csv", "networks/network7.csv", 100, 600)
 
     # data_counts = []
     # for i in range(1, len(sys.argv), 2):
@@ -308,6 +308,6 @@ if __name__ == "__main__" and len(sys.argv) % 2 == 1:
     # if len(data_counts) > 0:
     #     dh.generate_real_data(data_counts)
 
-    dh.read_network("networks/network4.csv")
-    for i in range(100, 5000, 500):
+    dh.read_network("networks/network6.csv")
+    for i in range(250, 5001, 250):
         dh.generate_real_data([i])
